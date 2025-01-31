@@ -1,0 +1,23 @@
+{
+  "name": "api",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "env-cmd -f ./env/.env nodemon ./bin/www",
+    "dev": "env-cmd -f ./env/.dev.env nodemon ./bin/www",
+    "prod": "env-cmd -f ./env/.prod.env nodemon ./bin/www"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "~1.4.4",
+    "cors": "^2.8.5",
+    "debug": "~2.6.9",
+    "express": "^4.21.2",
+    "mongoose": "^8.9.5",
+    "morgan": "~1.9.1",
+    "nodemon": "^3.1.9"
+  },
+  "devDependencies": {
+    "env-cmd": "^10.1.0"
+  }
+}
