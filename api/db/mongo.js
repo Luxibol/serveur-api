@@ -1,49 +1,29 @@
 const { ServerApiVersion } = require('mongodb');
-
-const mongoose = require('mongoose')
-
+const mongoose = require('mongoose');
+require('dotenv').config(); // Charge les variables d'environnement
 
 const clientOption = {
-
-    serverApi: {
-
-      version: ServerApiVersion.v1,
-
-      strict: true,
-
-      deprecationErrors: true,
-
-    }
-
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
 };
 
-
 exports.initClientDbConnection = async () => {
+  try {
+    // Connexion à MongoDB
+    await mongoose.connect(process.env.URL_MONGO, clientOption);
 
-    try {
+    console.log("✅ Connected to MongoDB");
 
-        // Connect the client to the server (optional starting in v4.7)
+    // Vérification avec un ping
+    const db = mongoose.connection.db;
+    const pingResult = await db.admin().command({ ping: 1 });
 
-        await clientOption.connect();
-
-        // Send a ping to confirm a successful connection
-
-        await clientOption.db("admin").command({ ping: 1 });
-
-        //console.log("Pinged your deployment. You successfully connected to MongoDB!");
-
-        await mongoose.connect(process.env.URL_MONGO, clientOption)
-
-        console.log("connected")
-
-      } catch (e) {
-
-        // Ensures that the client will close when you finish/error
-
-        console.log(e);
-
-        throw e
-
-    }
-
+    console.log("🔹 Réponse au ping :", pingResult);
+  } catch (e) {
+    console.error("❌ Error connecting to MongoDB:", e.stack);
+    throw e;
+  }
 };
