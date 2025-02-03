@@ -4,12 +4,18 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const SECRET_KEY = process.env.SECRET_KEY;
+const mongoose = require('mongoose');
 
 //On exporte le callback afin d'y accéder dans notre gestionnaire de routes
 //Ici c'est le callback qui servira à ajouter un user avec son id 
 exports.getById = async (req, res, next) => {
     const id = req.params.id
     
+    // Vérification de la validité de l'ID
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ error: "ID invalide" });
+    }
+
     try {
         let user = await User.findById(id);
 
