@@ -4,6 +4,7 @@ const logger        = require('morgan');
 const cors          = require('cors');
 
 const indexRouter = require('./routes/index');
+const userRoutes = require("./routes/users"); 
 const mongodb     = require('./db/mongo');
 
 mongodb.initClientDbConnection();
@@ -20,6 +21,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 
+app.use("/users", userRoutes); 
 app.use('/', indexRouter);
 
 app.use(function(req, res, next) {
