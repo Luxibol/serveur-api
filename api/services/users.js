@@ -144,11 +144,13 @@ exports.deleteByEmail = async (req, res) => {
 };
 
 // Récupérer tous les utilisateurs
-exports.getAllUsers = async (req, res) => {
+exports.getAllUsers = async () => {
     try {
-        const users = await User.find({}, '-password'); // Exclure le mot de passe des résultats
-        res.json(users);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
+        const users = await User.find({}, '-password'); // Exclut le mot de passe
+        return users;
+    } catch (error) {
+        console.error("Erreur lors de la récupération des utilisateurs :", error);
+        throw new Error("Impossible de récupérer les utilisateurs");
     }
 };
+
