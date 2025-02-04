@@ -11,9 +11,9 @@ router.post('/', service.add);
 router.post('/authenticate', service.authenticate);
 
 // Routes dynamiques
-router.get('/:email', /* private.checkJWT, */ service.getByEmail);
-router.patch('/:email', /* private.checkJWT, */ service.updateByEmail);
-router.delete('/:email', /* private.checkJWT, */ service.deleteByEmail);
+router.get('/:email', private.checkJWT, service.getByEmail);
+router.patch('/:email', private.checkJWT, service.updateByEmail);
+router.delete('/:email', private.checkJWT, service.deleteByEmail);
 
 // Route pour récupérer tous les utilisateurs
 router.get('/', async (req, res) => {
