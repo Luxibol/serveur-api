@@ -1,4 +1,3 @@
-// On importe le modèle de données
 const User = require('../models/users');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -6,127 +5,150 @@ require('dotenv').config();
 const SECRET_KEY = process.env.SECRET_KEY;
 const mongoose = require('mongoose');
 
-//On exporte le callback afin d'y accéder dans notre gestionnaire de routes
-//Ici c'est le callback qui servira à ajouter un user avec son id 
+// Récupérer un utilisateur par ID
 exports.getById = async (req, res, next) => {
-    const id = req.params.id
+    const id = req.params.id;
     
-    // Vérification de la validité de l'ID
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ error: "ID invalide" });
     }
 
     try {
         let user = await User.findById(id);
-
         if (user) {
             return res.status(200).json(user);
         }
-
-        return res.status(404).json('user_not_found');
+        return res.status(404).json({ message: 'Utilisateur non trouvé' });
     } catch (error) {
-        return res.status(501).json(error);
+        return res.status(500).json(error);
     }
-}
+};
 
-//Ici c'est le callback qui servira à ajouter un user
-//Il manque la vérification des données
+// Ajouter un utilisateur
 exports.add = async (req, res, next) => {
+    const { username, email, password } = req.body;
 
-    const temp = ({
-        name     : req.body.name,
-        firstname: req.body.firstname,
-        email    : req.body.email,
-        password : req.body.password,
-    });
+    if (!username || !email || !password) {
+        return res.status(400).json({ message: "Tous les champs obligatoires ne sont pas remplis." });
+    }
 
     try {
-        let user = await User.create(temp);
-
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = new User({ username, email, password: hashedPassword });
+        await user.save();
         return res.status(201).json(user);
     } catch (error) {
-        return res.status(501).json(error);
+        return res.status(400).json(error);
     }
-}
+};
 
-//Ici c'est le callback qui servira à modifier un user
+// Modifier un utilisateur
 exports.update = async (req, res, next) => {
-    const id = req.params.id
-    const temp = ({
-        name     : req.body.name,
-        firstname: req.body.firstname,
-        email    : req.body.email,
-        password : req.body.password,
-    });
+    const { password, ...updates } = req.body;
+    const id = req.params.id;
 
     try {
-        let user = await User.findOne({_id : id});
+        let user = await User.findById(id);
+        if (!user) return res.status(404).json({ message: "Utilisateur non trouvé" });
 
-        if (user) {
-            Object.keys(temp).forEach((key) => {
-                if (!!temp[key]) {
-                    user[key] = temp[key];
-                }
-            });
-
-            await user.save();
-            return res.status(201).json(user);            
+        if (password) {
+            updates.password = await bcrypt.hash(password, 10);
         }
 
-        return res.status(404).json('user_not_found');
+        Object.assign(user, updates);
+        await user.save();
+        return res.status(200).json(user);
     } catch (error) {
-        return res.status(501).json(error);
+        return res.status(400).json(error);
     }
-}
+};
 
-//Ici c'est le callback qui servira à supprimer un user
+// Supprimer un utilisateur
 exports.delete = async (req, res, next) => {
-    const id = req.params.id
+    const id = req.params.id;
 
     try {
-        await User.deleteOne({_id: id});
-
-        return res.status(204).json('delete_ok');        
+        await User.deleteOne({ _id: id });
+        return res.status(204).json({ message: "Utilisateur supprimé" });        
     } catch (error) {
-        return res.status(501).json(error);
+        return res.status(500).json(error);
     }
-}
+};
 
-//Ici c'est la verification du mot de passe
+// Authentifier un utilisateur
 exports.authenticate = async (req, res, next) => {
     const { email, password } = req.body;
 
     try {
-        let user = await User.findOne({ email: email }, '-__v -createdAt -updatedAt');
-
-        if (user) {
-            bcrypt.compare(password, user.password, function(err, response) {
-                if (err) {
-                    throw new Error(err);
-                }
-                if (response) {
-                    delete user._doc.password;
-
-                    const expiresIn = 24 * 60 *60;
-                    const token    = jwt.sign({
-                        user: user
-                    },
-                    SECRET_KEY,
-                    {
-                        expiresIn: expiresIn
-                    });
-
-                    res.header('Authorization', `Bearer ${token}`);
-
-                    return res.status(200).json('authenticate_succeed');
-                }
-
-                return res.status(403).json('wrong_Credentials');            
-            });
-        } else {
-            return res.status(404).json('user_not_found');
+        let user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: "Utilisateur non trouvé" });
         }
+
+        // Vérification du mot de passe
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(403).json({ message: "Identifiants incorrects" });
+        }
+
+        const token = jwt.sign({ userId: user._id }, SECRET_KEY, { expiresIn: "24h" });
+        return res.status(200).json({ token, user: { username: user.username, email: user.email } });
+
     } catch (error) {
-        return res.status(501).json(error);
+        return res.status(500).json(error);
     }
-}
+};
+
+// Récupérer un utilisateur par email
+exports.getByEmail = async (req, res) => {
+    try {
+        const user = await User.findOne({ email: req.params.email });
+        if (!user) return res.status(404).json({ message: "Utilisateur non trouvé" });
+        res.json(user);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+// Mettre à jour un utilisateur par email
+exports.updateByEmail = async (req, res) => {
+    const { password, ...updates } = req.body;
+
+    try {
+        if (password) {
+            updates.password = await bcrypt.hash(password, 10);
+        }
+
+        const updatedUser = await User.findOneAndUpdate(
+            { email: req.params.email },
+            updates,
+            { new: true }
+        );
+
+        if (!updatedUser) return res.status(404).json({ message: "Utilisateur non trouvé" });
+
+        res.json(updatedUser);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+};
+
+// Supprimer un utilisateur par email
+exports.deleteByEmail = async (req, res) => {
+    try {
+        await User.findOneAndDelete({ email: req.params.email });
+        res.json({ message: "Utilisateur supprimé" });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+// Récupérer tous les utilisateurs
+exports.getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find({}, '-password'); // Exclure le mot de passe des résultats
+        res.json(users);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
