@@ -5,14 +5,13 @@ const userRoute = require('../routes/users');
 const catwayRoute = require('../routes/catways');
 const reservationRoute = require('../routes/reservations');
 
+var express = require('express');
+var router = express.Router();
+
 router.get('/', async (req, res) => {
-  res.status(200).json({
-    name   : process.env.APP_NAME,
-    version: '1.0',
-    status : 200,
-    message: 'Bienvenue sur l\'API !'
-  });
+  res.render("index", { user: null, message: null });
 });
+
 
 router.use('/users', userRoute);
 router.use('/catways', catwayRoute);
