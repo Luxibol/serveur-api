@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de Bord</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <nav>
+        <ul>
+            <li><a href="/users">Utilisateurs</a></li>
+            <li><a href="/catways">Catways</a></li>
+            <li><a href="/reservations">Réservations</a></li>
+            <li><a href="/docs">Documentation API</a></li>
+            <li><a href="/users/logout">Se Déconnecter</a></li>
+        </ul>
+    </nav>
+
+    <h1>Tableau de Bord</h1>
+    <p><strong>Utilisateur :</strong> <%= user.username %> (<%= user.email %>)</p>
+    <p><strong>Date :</strong> <%= date %></p>
+
+    <h2>Réservations en cours</h2>
+    <table border="1">
+        <tr>
+            <th>Client</th>
+            <th>Bateau</th>
+            <th>Catway</th>
+            <th>Date début</th>
+            <th>Date fin</th>
+        </tr>
+        <% reservations.forEach(reservation => { %>
+            <tr>
+                <td><%= reservation.clientName %></td>
+                <td><%= reservation.boatName %></td>
+                <td><%= reservation.catwayNumber %></td>
+                <td><%= reservation.startDate.toLocaleDateString() %></td>
+                <td><%= reservation.endDate.toLocaleDateString() %></td>
+            </tr>
+        <% }) %>
+    </table>
+
+</body>
+</html>

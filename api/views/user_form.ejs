@@ -1,0 +1,16 @@
+<form action="/users/<%= action === 'Modifier' ? 'edit/' + (user ? user.email : '') : 'new' %>" method="POST">
+    <label>Email :</label>
+    <input type="email" name="email" value="<%= user ? user.email : '' %>" required <%= action === 'Modifier' ? 'readonly' : '' %>><br>
+
+    <label>Nom d'utilisateur :</label>
+    <input type="text" name="username" value="<%= user ? user.username : '' %>" required><br>
+
+    <label>Mot de passe :</label>
+    <input type="password" name="password" <%= action === 'Modifier' ? '' : 'required' %>><br>
+
+    <button type="submit"><%= action %></button>
+</form>
+
+<br>
+<a href="/users">⬅️ Retour à la gestion des utilisateurs</a>
+<a href="/dashboard">⬅️ Retour au Tableau de Bord</a> <!-- ✅ Ajout du lien vers le tableau de bord -->

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Utilisateurs</title>
+</head>
+<body>
+
+    <h1>Gestion des Utilisateurs</h1>
+    
+    <a href="/users/new">➕ Ajouter un Utilisateur</a>
+    <a href="/dashboard">⬅️ Retour au Tableau de Bord</a>
+
+    <table border="1">
+        <tr>
+            <th>Email</th>
+            <th>Nom d'utilisateur</th>
+            <th>Actions</th>
+        </tr>
+        <% if (Array.isArray(users) && users.length > 0) { %>
+            <% users.forEach(user => { %>
+                <tr>
+                    <td><%= user.email %></td>
+                    <td><%= user.username %></td>
+                    <td>
+                        <a href="/users/edit/<%= user.email %>">✏️ Modifier</a>
+                        <a href="/users/delete/<%= user.email %>" onclick="return confirm('Confirmer suppression ?');">❌ Supprimer</a>
+                    </td>
+                </tr>
+            <% }) %>
+        <% } else { %>
+            <tr>
+                <td colspan="3">Aucun utilisateur trouvé.</td>
+            </tr>
+        <% } %>
+    </table>
+
+</body>
+</html>

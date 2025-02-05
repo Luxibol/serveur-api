@@ -1,20 +1,14 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
-const userRoute = require('../routes/users');
-const catwayRoute = require('../routes/catways');
-const reservationRoute = require('../routes/reservations');
-
-var express = require('express');
-var router = express.Router();
-
-router.get('/', async (req, res) => {
-  res.render("index", { user: null, message: null });
+// Route pour afficher la page d'accueil
+router.get("/", (req, res) => {
+    res.render("index", { user: req.session?.user || null, message: null });
 });
 
-
-router.use('/users', userRoute);
-router.use('/catways', catwayRoute);
-router.use('/reservations', reservationRoute); // Ajoute la gestion des réservations
+// Route pour afficher la documentation
+router.get("/docs", (req, res) => {
+    res.render("docs");
+});
 
 module.exports = router;
