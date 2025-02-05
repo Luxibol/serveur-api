@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Catways</title>
+</head>
+<body>
+
+    <h1>Gestion des Catways</h1>
+    <a href="/catways/new">➕ Ajouter un Catway</a>
+    <a href="/dashboard">⬅️ Retour au Tableau de Bord</a>
+
+    <table border="1">
+        <tr>
+            <th>Numéro</th>
+            <th>Type</th>
+            <th>État</th>
+            <th>Actions</th>
+        </tr>
+        <% if (Array.isArray(catways) && catways.length > 0) { %>
+            <% catways.forEach(catway => { %>
+                <tr>
+                    <td><%= catway.catwayNumber %></td>
+                    <td><%= catway.catwayType %></td>
+                    <td><%= catway.catwayState %></td>
+                    <td>
+                        <a href="/catways/edit/<%= catway._id %>">✏️ Modifier</a>
+                        <a href="/catways/delete/<%= catway._id %>" onclick="return confirm('Confirmer suppression ?');">❌ Supprimer</a>
+                    </td>
+                </tr>
+            <% }) %>
+        <% } else { %>
+            <tr>
+                <td colspan="4">Aucun catway trouvé.</td>
+            </tr>
+        <% } %>
+    </table>
+
+</body>
+</html>

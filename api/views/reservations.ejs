@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Réservations</title>
+</head>
+<body>
+
+    <h1>Gestion des Réservations</h1>
+    <a href="/reservations/new">➕ Ajouter une Réservation</a>
+    <a href="/dashboard">⬅️ Retour au Tableau de Bord</a>
+
+    <table border="1">
+        <tr>
+            <th>Client</th>
+            <th>Bateau</th>
+            <th>Catway</th>
+            <th>Date Début</th>
+            <th>Date Fin</th>
+            <th>Actions</th>
+        </tr>
+        <% if (Array.isArray(reservations) && reservations.length > 0) { %>
+            <% reservations.forEach(reservation => { %>
+                <tr>
+                    <td><%= reservation.clientName %></td>
+                    <td><%= reservation.boatName %></td>
+                    <td><%= reservation.catwayNumber %></td>
+                    <td><%= new Date(reservation.startDate).toLocaleDateString() %></td>
+                    <td><%= new Date(reservation.endDate).toLocaleDateString() %></td>
+                    <td>
+                        <a href="/reservations/edit/<%= reservation._id %>">✏️ Modifier</a>
+                        <a href="/reservations/delete/<%= reservation._id %>" onclick="return confirm('Confirmer suppression ?');">❌ Supprimer</a>
+                    </td>
+                </tr>
+            <% }) %>
+        <% } else { %>
+            <tr>
+                <td colspan="6">Aucune réservation trouvée.</td>
+            </tr>
+        <% } %>
+    </table>
+
+</body>
+</html>

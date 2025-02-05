@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= action %> un Catway</title>
+</head>
+<body>
+
+    <h1><%= action %> un Catway</h1>
+
+    <form action="/catways/<%= action === 'Modifier' ? 'edit/' + catway._id : 'new' %>" method="POST">
+        <label>Numéro :</label>
+        <input type="text" name="catwayNumber" value="<%= catway ? catway.catwayNumber : '' %>" required <%= action === 'Modifier' ? 'readonly' : '' %>><br>
+
+        <label>Type :</label>
+        <input type="text" name="catwayType" value="<%= catway ? catway.catwayType : '' %>" required><br>
+
+        <label>État :</label>
+        <input type="text" name="catwayState" value="<%= catway ? catway.catwayState : '' %>" required><br>
+
+        <button type="submit"><%= action %></button>
+    </form>
+
+    <br>
+    <a href="/catways">⬅️ Retour à la gestion des catways</a>
+
+</body>
+</html>

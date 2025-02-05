@@ -6,7 +6,7 @@ const SECRET_KEY = process.env.SECRET_KEY;
 const mongoose = require('mongoose');
 
 // Récupérer un utilisateur par ID
-exports.getById = async (req, res, next) => {
+exports.getById = async (req, res) => {
     const id = req.params.id;
     
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -14,18 +14,18 @@ exports.getById = async (req, res, next) => {
     }
 
     try {
-        let user = await User.findById(id);
+        let user = await User.findById(id).select("-password"); // Exclut le mot de passe
         if (user) {
             return res.status(200).json(user);
         }
         return res.status(404).json({ message: 'Utilisateur non trouvé' });
     } catch (error) {
-        return res.status(500).json(error);
+        return res.status(500).json({ message: "Erreur serveur", error });
     }
 };
 
 // Ajouter un utilisateur
-exports.add = async (req, res, next) => {
+exports.add = async (req, res) => {
     const { username, email, password } = req.body;
 
     if (!username || !email || !password) {
@@ -38,12 +38,12 @@ exports.add = async (req, res, next) => {
         await user.save();
         return res.status(201).json(user);
     } catch (error) {
-        return res.status(400).json(error);
+        return res.status(400).json({ message: "Erreur lors de la création de l'utilisateur", error });
     }
 };
 
 // Modifier un utilisateur
-exports.update = async (req, res, next) => {
+exports.update = async (req, res) => {
     const { password, ...updates } = req.body;
     const id = req.params.id;
 
@@ -59,43 +59,63 @@ exports.update = async (req, res, next) => {
         await user.save();
         return res.status(200).json(user);
     } catch (error) {
-        return res.status(400).json(error);
+        return res.status(400).json({ message: "Erreur lors de la mise à jour", error });
     }
 };
 
 // Supprimer un utilisateur
-exports.delete = async (req, res, next) => {
+exports.delete = async (req, res) => {
     const id = req.params.id;
 
     try {
-        await User.deleteOne({ _id: id });
+        await User.findByIdAndDelete(id);
         return res.status(204).json({ message: "Utilisateur supprimé" });        
     } catch (error) {
-        return res.status(500).json(error);
+        return res.status(500).json({ message: "Erreur lors de la suppression", error });
     }
 };
 
 // Authentifier un utilisateur
-exports.authenticate = async (req, res, next) => {
+exports.authenticate = async (req, res) => {
     const { email, password } = req.body;
 
     try {
+        console.log("🔹 Recherche de l'utilisateur :", email);
+
         let user = await User.findOne({ email });
         if (!user) {
-            return res.status(404).json({ message: "Utilisateur non trouvé" });
+            console.log("🔴 Utilisateur non trouvé !");
+            return res.status(401).render("index", { message: "Utilisateur non trouvé" });
         }
 
         // Vérification du mot de passe
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.status(403).json({ message: "Identifiants incorrects" });
+            console.log("🔴 Mot de passe incorrect !");
+            return res.status(401).render("index", { message: "Identifiants incorrects" });
         }
 
-        const token = jwt.sign({ userId: user._id }, SECRET_KEY, { expiresIn: "24h" });
-        return res.status(200).json({ token, user: { username: user.username, email: user.email } });
+        console.log("🟢 Utilisateur trouvé :", user.email);
+
+        // Génération du token
+        const token = jwt.sign(
+            { userId: user._id, username: user.username, email: user.email },
+            SECRET_KEY,
+            { expiresIn: "24h" }
+        );
+
+        console.log("🟢 Token généré :", token);
+
+        // Stocke le token et l'utilisateur en session
+        req.session.token = token;
+        req.session.user = { username: user.username, email: user.email };
+
+        // Redirige vers le dashboard
+        res.redirect("/dashboard");
 
     } catch (error) {
-        return res.status(500).json(error);
+        console.error(" Erreur d'authentification :", error);
+        if (!res.headersSent) res.status(500).render("index", { message: "Erreur serveur" });
     }
 };
 
@@ -103,12 +123,14 @@ exports.authenticate = async (req, res, next) => {
 exports.getByEmail = async (req, res) => {
     try {
         const user = await User.findOne({ email: req.params.email });
-        if (!user) return res.status(404).json({ message: "Utilisateur non trouvé" });
-        res.json(user);
+        if (!user) return null;  // Retourne `null` au lieu d'envoyer une réponse HTTP
+        return user;
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        console.error(" Erreur lors de la récupération de l'utilisateur :", err);
+        return null;  // Évite l'erreur de double envoi de réponse
     }
 };
+
 
 // Mettre à jour un utilisateur par email
 exports.updateByEmail = async (req, res) => {
@@ -125,32 +147,41 @@ exports.updateByEmail = async (req, res) => {
             { new: true }
         );
 
-        if (!updatedUser) return res.status(404).json({ message: "Utilisateur non trouvé" });
+        if (!updatedUser) return null;  // Retourne `null` si l'utilisateur n'existe pas
 
-        res.json(updatedUser);
+        return updatedUser;  // Retourne l'utilisateur mis à jour
     } catch (err) {
-        res.status(400).json({ message: err.message });
+        console.error(" Erreur lors de la mise à jour de l'utilisateur :", err);
+        return null;
     }
 };
+
+
 
 // Supprimer un utilisateur par email
 exports.deleteByEmail = async (req, res) => {
     try {
         await User.findOneAndDelete({ email: req.params.email });
-        res.json({ message: "Utilisateur supprimé" });
+        return true;  // Retourne `true` si l'utilisateur est supprimé
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        return res.status(500).json({ message: err.message });
     }
 };
 
 // Récupérer tous les utilisateurs
 exports.getAllUsers = async () => {
     try {
-        const users = await User.find({}, '-password'); // Exclut le mot de passe
+        const users = await User.find({}, '-password'); // Exclut le mot de passe des résultats
+        if (!Array.isArray(users)) {
+            console.error(" Erreur : getAllUsers() ne retourne pas un tableau !");
+            return [];
+        }
         return users;
     } catch (error) {
-        console.error("Erreur lors de la récupération des utilisateurs :", error);
+        console.error(" Erreur lors de la récupération des utilisateurs :", error);
         throw new Error("Impossible de récupérer les utilisateurs");
     }
 };
+
+
 

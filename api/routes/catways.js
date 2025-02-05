@@ -1,63 +1,66 @@
-// routes/catways.js
 const express = require("express");
 const router = express.Router();
-const Catway = require("../models/catways");
+const service = require("../services/catways");
+const private = require("../middlewares/private");
 
-// GET: Liste de tous les catways
-router.get("/", async (req, res) => {
+// Récupérer tous les catways
+router.get("/", private.checkJWT, async (req, res) => {
     try {
-        const catways = await Catway.find();
-        res.json(catways);
+        const catways = await service.getAllCatways();
+        res.render("catways", { title: "Gestion des Catways", catways });
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        console.error("Erreur lors de la récupération des catways :", err);
+        res.status(500).send("Erreur serveur");
     }
 });
 
-// GET: Détails d'un catway
-router.get("/:id", async (req, res) => {
+// Afficher le formulaire de création d'un catway
+router.get("/new", private.checkJWT, (req, res) => {
+    res.render("catway_form", { title: "Ajouter un Catway", action: "Ajouter", catway: null });
+});
+
+// Afficher le formulaire de modification d'un catway
+router.get("/edit/:id", private.checkJWT, async (req, res) => {
     try {
-        const catway = await Catway.findOne({ catwayNumber: req.params.id });  // Utilise catwayNumber
-        if (!catway) return res.status(404).json({ message: "Catway non trouvé" });
-        res.json(catway);
+        const catway = await service.getById(req.params.id);
+        if (!catway) return res.status(404).send("Catway non trouvé");
+        res.render("catway_form", { title: "Modifier un Catway", action: "Modifier", catway });
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        console.error(" Erreur lors de la récupération du catway :", err);
+        res.status(500).send("Erreur serveur");
     }
 });
 
-// POST: Création d'un catway
-router.post("/", async (req, res) => {
-    const catway = new Catway(req.body);
+// Ajouter un catway
+router.post("/new", private.checkJWT, async (req, res) => {
     try {
-        await catway.save();
-        res.status(201).json(catway);
+        await service.add(req.body);
+        res.redirect("/catways");
     } catch (err) {
-        res.status(400).json({ message: err.message });
+        console.error(" Erreur lors de l'ajout d'un catway :", err);
+        res.status(500).send("Erreur serveur");
     }
 });
 
-// PUT: Mise à jour de l'état d'un catway
-router.put("/:id", async (req, res) => {
+// Modifier un catway
+router.post("/edit/:id", private.checkJWT, async (req, res) => {
     try {
-        const updatedCatway = await Catway.findOneAndUpdate(
-            { catwayNumber: req.params.id },  // Recherche par catwayNumber
-            { catwayState: req.body.catwayState },  
-            { new: true }
-        );
-        if (!updatedCatway) return res.status(404).json({ message: "Catway non trouvé" });
-        res.json(updatedCatway);
+        await service.update(req.params.id, req.body);
+        res.redirect("/catways");
     } catch (err) {
-        res.status(400).json({ message: err.message });
+        console.error(" Erreur lors de la mise à jour d'un catway :", err);
+        res.status(500).send("Erreur serveur");
     }
 });
 
-// DELETE: Suppression d'un catway
-router.delete("/:id", async (req, res) => {
+//  Supprimer un catway
+router.get("/delete/:id", private.checkJWT, async (req, res) => {
     try {
-        const deletedCatway = await Catway.findOneAndDelete({ catwayNumber: req.params.id });
-        if (!deletedCatway) return res.status(404).json({ message: "Catway non trouvé" });
-        res.json({ message: "Catway supprimé" });
+        await service.delete(req.params.id);
+        res.redirect("/catways");
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        console.error(" Erreur lors de la suppression du catway :", err);
+        res.status(500).send("Erreur serveur");
     }
 });
 

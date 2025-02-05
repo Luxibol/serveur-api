@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= action %> une Réservation</title>
+</head>
+<body>
+
+    <h1><%= action %> une Réservation</h1>
+
+    <form action="/reservations/<%= action === 'Modifier' ? 'edit/' + reservation._id : 'new' %>" method="POST">
+        <label>Nom du Client :</label>
+        <input type="text" name="clientName" value="<%= reservation ? reservation.clientName : '' %>" required><br>
+
+        <label>Nom du Bateau :</label>
+        <input type="text" name="boatName" value="<%= reservation ? reservation.boatName : '' %>" required><br>
+
+        <label>Numéro de Catway :</label>
+        <input type="text" name="catwayNumber" value="<%= reservation ? reservation.catwayNumber : '' %>" required><br>
+
+        <label>Date de Début :</label>
+        <input type="date" name="startDate" value="<%= reservation ? reservation.startDate.toISOString().split('T')[0] : '' %>" required><br>
+
+        <label>Date de Fin :</label>
+        <input type="date" name="endDate" value="<%= reservation ? reservation.endDate.toISOString().split('T')[0] : '' %>" required><br>
+
+        <button type="submit"><%= action %></button>
+    </form>
+
+    <br>
+    <a href="/reservations">⬅️ Retour à la gestion des réservations</a>
+
+</body>
+</html>
