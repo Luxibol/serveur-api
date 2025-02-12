@@ -10,10 +10,10 @@ const clientOption = {
   }
 };
 
-// Vérification de la variable d'environnement
-const MONGO_URI = process.env.URL_MONGO;
+console.log("🔍 Toutes les variables d'environnement disponibles :");
+console.log(process.env);
+console.log("🔍 Vérification : URL_MONGO =", process.env.URL_MONGO);
 
-console.log("🔍 Vérification : URL_MONGO =", MONGO_URI);
 
 if (!MONGO_URI) {
     console.error("❌ ERREUR : La variable d'environnement URL_MONGO est indéfinie !");
