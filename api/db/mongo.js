@@ -10,10 +10,20 @@ const clientOption = {
   }
 };
 
+// Vérification de la variable d'environnement
+const MONGO_URI = process.env.URL_MONGO;
+
+console.log("🔍 Vérification : URL_MONGO =", MONGO_URI);
+
+if (!MONGO_URI) {
+    console.error("❌ ERREUR : La variable d'environnement URL_MONGO est indéfinie !");
+    process.exit(1); // Stoppe l'application si la connexion est impossible
+}
+
 exports.initClientDbConnection = async () => {
   try {
     // Connexion à MongoDB
-    await mongoose.connect(process.env.URL_MONGO, clientOption);
+    await mongoose.connect(MONGO_URI, clientOption);
 
     console.log("✅ Connected to MongoDB");
 
