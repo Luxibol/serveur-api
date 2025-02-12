@@ -10,6 +10,7 @@ const clientOption = {
   }
 };
 
+console.log("🔍 TEST_VARIABLE =", process.env.TEST_VARIABLE);
 console.log("🔍 Toutes les variables d'environnement disponibles :");
 console.log(process.env);
 console.log("🔍 Vérification : URL_MONGO =", process.env.URL_MONGO);
