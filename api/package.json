@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./bin/www",
+    "start": "node ./bin/www",
     "dev": "env-cmd -f ./env/.dev.env nodemon ./bin/www",
     "prod": "env-cmd -f ./env/.prod.env nodemon ./bin/www"
   },
