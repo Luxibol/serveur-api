@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "env-cmd -f ./env/.env nodemon ./bin/www",
+    "start": "nodemon ./bin/www",
     "dev": "env-cmd -f ./env/.dev.env nodemon ./bin/www",
     "prod": "env-cmd -f ./env/.prod.env nodemon ./bin/www"
   },
@@ -13,7 +13,6 @@
     "cors": "^2.8.5",
     "debug": "~2.6.9",
     "ejs": "^3.1.10",
-    "env-cmd": "^10.1.0",
     "express": "^4.21.2",
     "express-session": "^1.18.1",
     "jsonwebtoken": "^9.0.2",
