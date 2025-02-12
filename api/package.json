@@ -13,6 +13,7 @@
     "cors": "^2.8.5",
     "debug": "~2.6.9",
     "ejs": "^3.1.10",
+    "env-cmd": "^10.1.0",
     "express": "^4.21.2",
     "express-session": "^1.18.1",
     "jsonwebtoken": "^9.0.2",
@@ -21,7 +22,6 @@
     "nodemon": "^3.1.9"
   },
   "devDependencies": {
-    "dotenv": "^16.4.7",
-    "env-cmd": "^10.1.0"
+    "dotenv": "^16.4.7"
   }
 }
